@@ -1,3 +1,108 @@
+// ==================== COSMIC BACKGROUND CANVAS ====================
+function initCosmicBackground() {
+    const canvas = document.getElementById('cosmic-canvas');
+    if (!canvas) return;
+    
+    const ctx = canvas.getContext('2d');
+    let stars = [];
+    
+    function resize() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        initStars();
+    }
+    
+    function initStars() {
+        stars = [];
+        const numStars = Math.floor((canvas.width * canvas.height) / 3000);
+        for (let i = 0; i < numStars; i++) {
+            stars.push({
+                x: Math.random() * canvas.width,
+                y: Math.random() * canvas.height,
+                radius: Math.random() * 1.5,
+                vx: (Math.random() - 0.5) * 0.2,
+                vy: (Math.random() - 0.5) * 0.2,
+                opacity: Math.random() * 0.5 + 0.3
+            });
+        }
+    }
+    
+    function animate() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
+        stars.forEach(star => {
+            ctx.beginPath();
+            ctx.arc(star.x, star.y, star.radius, 0, Math.PI * 2);
+            ctx.fillStyle = `rgba(139, 92, 246, ${star.opacity})`;
+            ctx.fill();
+            
+            star.x += star.vx;
+            star.y += star.vy;
+            
+            if (star.x < 0 || star.x > canvas.width) star.vx = -star.vx;
+            if (star.y < 0 || star.y > canvas.height) star.vy = -star.vy;
+        });
+        
+        requestAnimationFrame(animate);
+    }
+    
+    resize();
+    window.addEventListener('resize', resize);
+    animate();
+}
+
+// ==================== COSMIC ORB CANVAS ====================
+function initCosmicOrb() {
+    const canvas = document.getElementById('orb-canvas');
+    if (!canvas) return;
+    
+    const ctx = canvas.getContext('2d');
+    let time = 0;
+    
+    function resize() {
+        const size = canvas.parentElement.offsetWidth;
+        canvas.width = size;
+        canvas.height = size;
+    }
+    
+    function animate() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
+        const centerX = canvas.width / 2;
+        const centerY = canvas.height / 2;
+        const radius = canvas.width / 2;
+        
+        // Create gradient
+        const gradient = ctx.createRadialGradient(centerX, centerY, 0, centerX, centerY, radius);
+        gradient.addColorStop(0, 'rgba(102, 126, 234, 0.8)');
+        gradient.addColorStop(0.5, 'rgba(118, 75, 162, 0.6)');
+        gradient.addColorStop(1, 'rgba(240, 147, 251, 0.3)');
+        
+        ctx.beginPath();
+        ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
+        ctx.fillStyle = gradient;
+        ctx.fill();
+        
+        // Add pulsing effect
+        const pulseRadius = radius * (0.9 + Math.sin(time * 0.05) * 0.1);
+        const pulseGradient = ctx.createRadialGradient(centerX, centerY, 0, centerX, centerY, pulseRadius);
+        pulseGradient.addColorStop(0, 'rgba(255, 255, 255, 0.3)');
+        pulseGradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
+        
+        ctx.beginPath();
+        ctx.arc(centerX, centerY, pulseRadius, 0, Math.PI * 2);
+        ctx.fillStyle = pulseGradient;
+        ctx.fill();
+        
+        time++;
+        requestAnimationFrame(animate);
+    }
+    
+    resize();
+    window.addEventListener('resize', resize);
+    animate();
+}
+
 // ==================== LOCOMOTIVE SCROLL ====================
 function locomotiveAnimation() {
     gsap.registerPlugin(ScrollTrigger);
@@ -128,7 +233,6 @@ function mobileMenuAnimation() {
     const mobileLinks = document.querySelectorAll(".mobile-nav-link");
 
     if (!hamburger || !mobileMenu) {
-        console.log("Hamburger or mobile menu not found");
         return;
     }
 
@@ -368,7 +472,7 @@ function ctaButtonAnimation() {
     }
 }
 
-// ==================== CURSOR EFFECT (Desktop Only) ====================
+// ==================== CUSTOM CURSOR (Desktop Only) ====================
 function customCursor() {
     if (window.innerWidth > 968) {
         const cursor = document.createElement('div');
@@ -386,8 +490,8 @@ function customCursor() {
         });
 
         function animate() {
-            cursorX += (mouseX - cursorX) * 0.1;
-            cursorY += (mouseY - cursorY) * 0.1;
+            cursorX += (mouseX - cursorX) * 0.15;
+            cursorY += (mouseY - cursorY) * 0.15;
             
             cursor.style.left = cursorX + 'px';
             cursor.style.top = cursorY + 'px';
@@ -397,35 +501,13 @@ function customCursor() {
         animate();
 
         // Add hover effects
-        const hoverElements = document.querySelectorAll('a, button, .right-elem, .page5-elem, .sec-right');
+        const hoverElements = document.querySelectorAll('a, button, .right-elem, .page5-elem, .sec-right, #blue-btn');
         hoverElements.forEach(el => {
             el.addEventListener('mouseenter', () => cursor.classList.add('hover'));
             el.addEventListener('mouseleave', () => cursor.classList.remove('hover'));
         });
     }
 }
-
-// Add cursor styles dynamically
-const cursorStyle = document.createElement('style');
-cursorStyle.textContent = `
-    .custom-cursor {
-        width: 20px;
-        height: 20px;
-        border: 2px solid #0BA34E;
-        border-radius: 50%;
-        position: fixed;
-        pointer-events: none;
-        z-index: 9999;
-        transition: transform 0.2s ease, opacity 0.2s ease;
-        opacity: 0.6;
-    }
-    .custom-cursor.hover {
-        transform: scale(1.5);
-        opacity: 1;
-        background: rgba(11, 163, 78, 0.1);
-    }
-`;
-document.head.appendChild(cursorStyle);
 
 // ==================== PARALLAX EFFECT ====================
 function parallaxEffect() {
@@ -443,6 +525,10 @@ function parallaxEffect() {
 
 // ==================== INITIALIZE ALL FUNCTIONS ====================
 function init() {
+    // Initialize canvas backgrounds
+    initCosmicBackground();
+    initCosmicOrb();
+    
     // Check if on mobile
     const isMobile = window.innerWidth <= 968;
     
